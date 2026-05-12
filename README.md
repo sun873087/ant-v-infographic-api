@@ -4,6 +4,8 @@
 > 把 AntV Infographic syntax 轉成 **SVG / PNG** 的後端服務 — 給 Orion 內部使用。
 > **內網部署版**:支援 Nexus npm registry + 自架 Iconify Server + outbound fetch firewall。
 
+**Repo**: https://github.com/sun873087/ant-v-infographic-api
+
 ## ✨ 為什麼造這個
 
 AntV Infographic 沒有官方 HTTP API。對於後端產 SVG、塞進 Markdown / Email / PDF 等場景,需要一個自架服務。
