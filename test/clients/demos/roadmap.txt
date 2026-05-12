@@ -1,0 +1,12 @@
+infographic sequence-roadmap-vertical-pill-badge
+title 2026 產品 Roadmap
+data
+  items
+    - label Q1
+      desc Foundation:基礎服務上線
+    - label Q2
+      desc Beta:封閉測試
+    - label Q3
+      desc GA:公開發佈
+    - label Q4
+      desc Scale:擴大採用

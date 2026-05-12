@@ -1,0 +1,14 @@
+infographic sequence-funnel-simple
+title 客戶轉換漏斗
+data
+  items
+    - label 訪客
+      desc 100k 人次
+    - label 註冊
+      desc 25k 人次
+    - label 試用
+      desc 10k 人次
+    - label 付費
+      desc 2k 人次
+    - label 續訂
+      desc 1.5k 人次

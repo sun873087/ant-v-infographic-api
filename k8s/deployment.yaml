@@ -1,0 +1,139 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: infographic-api
+  namespace: orion
+  labels:
+    app.kubernetes.io/name: infographic-api
+    app.kubernetes.io/part-of: orion
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: infographic-api
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: infographic-api
+        app.kubernetes.io/part-of: orion
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "3000"
+        prometheus.io/path: "/metrics"
+    spec:
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1001
+        fsGroup: 1001
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+        - name: api
+          image: registry.internal/orion/infographic-api:0.1.0
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 3000
+              name: http
+          env:
+            - name: NODE_ENV
+              value: production
+            - name: HOST
+              value: 0.0.0.0
+            - name: PORT
+              value: "3000"
+            - name: LOG_LEVEL
+              value: info
+
+            # Redis
+            - name: REDIS_URL
+              valueFrom:
+                secretKeyRef:
+                  name: infographic-api-secrets
+                  key: redis-url
+            - name: CACHE_TTL_SECONDS
+              value: "86400"
+
+            # Rendering
+            - name: RENDER_TIMEOUT_MS
+              value: "10000"
+            - name: MAX_SYNTAX_BYTES
+              value: "65536"
+
+            # Internal Iconify mirror (self-hosted)
+            # 上線時把這個改成你們實際的內網 Iconify Server URL
+            - name: ICONIFY_API_HOST
+              value: http://iconify-server.orion.svc.cluster.local
+            # Optional: undraw illustrations mirror (留空就停用)
+            - name: ILLUSTRATION_HOST
+              value: ""
+            - name: RESOURCE_FETCH_TIMEOUT_MS
+              value: "3000"
+
+            # Remote Chromium for PNG rendering (browserless/playwright-compatible).
+            # 完整 URL(含 token)放 Secret,避免 leak。
+            - name: BROWSER_WS_ENDPOINT
+              valueFrom:
+                secretKeyRef:
+                  name: infographic-api-secrets
+                  key: browser-ws-endpoint
+
+            # Outbound fetch firewall — 白名單。內含:Iconify、OTel collector、illustration host(若有)。
+            # Browserless 走 WebSocket 不經 fetch,不必列;若 illustration 沒用可拿掉那個 host。
+            - name: ALLOWED_FETCH_HOSTS
+              value: "iconify-server.orion.svc.cluster.local,otel-collector.observability.svc.cluster.local"
+
+            # OpenTelemetry
+            - name: OTEL_ENABLED
+              value: "true"
+            - name: OTEL_SERVICE_NAME
+              value: infographic-api
+            - name: OTEL_EXPORTER_OTLP_ENDPOINT
+              value: http://otel-collector.observability.svc.cluster.local:4318
+          resources:
+            requests:
+              cpu: 100m
+              memory: 256Mi
+            limits:
+              cpu: 1000m
+              memory: 1Gi
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities:
+              drop: ["ALL"]
+          volumeMounts:
+            - name: tmp
+              mountPath: /tmp
+          livenessProbe:
+            httpGet:
+              path: /healthz
+              port: http
+            initialDelaySeconds: 15
+            periodSeconds: 20
+            timeoutSeconds: 3
+            failureThreshold: 3
+          readinessProbe:
+            httpGet:
+              path: /readyz
+              port: http
+            initialDelaySeconds: 5
+            periodSeconds: 10
+            timeoutSeconds: 5
+            failureThreshold: 3
+          startupProbe:
+            httpGet:
+              path: /healthz
+              port: http
+            initialDelaySeconds: 5
+            periodSeconds: 5
+            failureThreshold: 12 # ~60s startup grace
+      volumes:
+        - name: tmp
+          emptyDir: {}
+      topologySpreadConstraints:
+        - maxSkew: 1
+          topologyKey: kubernetes.io/hostname
+          whenUnsatisfiable: ScheduleAnyway
+          labelSelector:
+            matchLabels:
+              app.kubernetes.io/name: infographic-api

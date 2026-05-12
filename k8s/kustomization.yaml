@@ -1,0 +1,20 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+namespace: orion
+
+resources:
+  - iconify-server.yaml   # 內網 Iconify mirror,先部這個才能跑 API
+  - deployment.yaml
+  - service.yaml
+  - hpa.yaml
+  - networkpolicy.yaml
+  # - secret.example.yaml  # 取代為實際值或用 ESO / SealedSecrets
+
+commonLabels:
+  app.kubernetes.io/part-of: orion
+  app.kubernetes.io/managed-by: kustomize
+
+images:
+  - name: registry.internal/orion/infographic-api
+    newTag: "0.1.0"

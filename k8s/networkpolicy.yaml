@@ -1,0 +1,77 @@
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: infographic-api
+  namespace: orion
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: infographic-api
+  policyTypes:
+    - Ingress
+    - Egress
+  ingress:
+    # Allow ingress from any pod in the orion namespace (Orion backend services)
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: orion
+      ports:
+        - protocol: TCP
+          port: 3000
+  egress:
+    # DNS
+    - to:
+        - namespaceSelector: {}
+          podSelector:
+            matchLabels:
+              k8s-app: kube-dns
+      ports:
+        - protocol: UDP
+          port: 53
+        - protocol: TCP
+          port: 53
+
+    # Redis (same namespace)
+    - to:
+        - podSelector:
+            matchLabels:
+              app.kubernetes.io/name: redis
+      ports:
+        - protocol: TCP
+          port: 6379
+
+    # Internal Iconify Server (same namespace)
+    # 上線時調整 podSelector / namespaceSelector 對到你們實際部署
+    - to:
+        - podSelector:
+            matchLabels:
+              app.kubernetes.io/name: iconify-server
+      ports:
+        - protocol: TCP
+          port: 80
+        - protocol: TCP
+          port: 443
+
+    # OTel collector
+    - to:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: observability
+      ports:
+        - protocol: TCP
+          port: 4318
+
+    # Browserless (PNG rendering via WebSocket / playwright protocol)
+    # 上線時把 podSelector / namespaceSelector 調整成你們實際 browserless service。
+    # 若 browserless 部在 same namespace,留 podSelector 即可;跨 namespace 加 namespaceSelector。
+    - to:
+        - podSelector:
+            matchLabels:
+              app.kubernetes.io/name: browserless
+      ports:
+        - protocol: TCP
+          port: 3000  # default;若改 wss/443 也要加
+
+    # NOTE: We intentionally do NOT allow egress to 0.0.0.0/0.
+    # All external dependencies (icons, illustrations, Chromium) MUST be in-cluster.

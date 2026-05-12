@@ -1,0 +1,21 @@
+infographic compare-swot
+title SWOT 分析
+data
+  compares
+    - label Strengths
+      children
+        - label 強大技術團隊
+        - label 內網基礎完整
+        - label Orion 平台整合
+    - label Weaknesses
+      children
+        - label 開發週期長
+        - label 文件不齊
+    - label Opportunities
+      children
+        - label AI 整合機會
+        - label 跨部門合作
+    - label Threats
+      children
+        - label 外部 API 不可控
+        - label 資安合規壓力

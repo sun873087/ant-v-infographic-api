@@ -1,0 +1,30 @@
+# Dependencies
+node_modules/
+
+# Build output
+dist/
+
+# Environment & secrets
+.env
+.env.local
+.env.*.local
+.npmrc
+
+# Certificates (keep .gitkeep placeholder only)
+certs/*
+!certs/.gitkeep
+
+# Test outputs
+test/clients/output/
+
+# OS / Editor
+.DS_Store
+*.log
+npm-debug.log*
+.vscode/*
+!.vscode/settings.json
+!.vscode/extensions.json
+
+# Coverage
+coverage/
+*.lcov

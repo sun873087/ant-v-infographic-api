@@ -1,0 +1,16 @@
+infographic compare-hierarchy-row-letter-card-compact-card
+title 內網服務體系
+data
+  compares
+    - label 渲染層
+      children
+        - label SVG
+          desc Native 輸出
+        - label PNG
+          desc resvg 轉換
+    - label 資料層
+      children
+        - label Redis
+          desc 快取 SVG
+        - label Iconify
+          desc 圖示來源

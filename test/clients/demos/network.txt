@@ -1,0 +1,32 @@
+infographic relation-network-icon-badge
+title 服務依賴關係
+data
+  nodes
+    - id api
+      label API Server
+      icon mdi/server
+    - id redis
+      label Redis
+      icon mdi/database
+    - id iconify
+      label Iconify
+      icon mdi/image-multiple
+    - id resvg
+      label resvg
+      icon mdi/image-edit
+    - id otel
+      label OTel Collector
+      icon mdi/chart-timeline-variant
+  relations
+    - from api
+      to redis
+      label cache
+    - from api
+      to iconify
+      label fetch
+    - from api
+      to resvg
+      label png convert
+    - from api
+      to otel
+      label traces

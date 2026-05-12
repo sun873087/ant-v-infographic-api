@@ -1,0 +1,12 @@
+infographic list-grid-circular-progress
+title KPI 指標(2026 Q1)
+data
+  items
+    - label 部署成功率
+      value 98
+    - label MTTR
+      value 75
+    - label SLA 達成
+      value 99
+    - label 客戶滿意度
+      value 88
